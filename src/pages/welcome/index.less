@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  :global {
+    .ant-pro-grid-content {
+      flex: 1;
+
+      .ant-pro-grid-content-children {
+        height: 100%;
+
+        .ant-pro-layout-watermark-wrapper {
+          height: 100%;
+
+          & > div {
+            height: 100%;
+
+            .ant-pro-page-container-children-content {
+              height: 100%;
+              overflow: auto;
+            }
+          }
+        }
+      }
+    }
+  }
+}

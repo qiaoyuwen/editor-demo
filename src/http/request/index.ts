@@ -36,23 +36,9 @@ async function postJson<T>(url: string, data?: Record<string, any>): Promise<Res
   });
 }
 
-async function postFile<T>(
-  url: string,
-  fileObj: Record<string, File>,
-  jsonObj: Record<string, any> = {},
-): Promise<ResponseData<T>> {
+async function postFile<T>(url: string, file: File): Promise<ResponseData<T>> {
   const formData = new FormData();
-  Object.keys(fileObj).forEach((key) => {
-    formData.append(key, fileObj[key]);
-  });
-  Object.keys(jsonObj).forEach((key) => {
-    formData.append(
-      key,
-      new Blob([JSON.stringify(jsonObj[key])], {
-        type: 'application/json;charset=utf-8',
-      }),
-    );
-  });
+  formData.append('file', file);
   return request(url, {
     method: 'POST',
     data: formData,
