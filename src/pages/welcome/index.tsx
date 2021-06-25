@@ -29,13 +29,13 @@ const WelcomePage: FunctionComponent = () => {
             'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
           content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
           images_upload_url: '',
-
           images_upload_handler: async (blobInfo, success) => {
             const res = await FilesServices.uploadFile(
               new File([blobInfo.blob()], blobInfo.filename()),
             );
             success(`${AppConfig.ImgDomain}/${res.data.url}`);
           },
+          paste_data_images: true,
         }}
       />
     </PageContainer>
