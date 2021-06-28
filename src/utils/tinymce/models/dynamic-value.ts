@@ -9,7 +9,7 @@ export class DynamicValue {
   createDom() {
     const ele = document.createElement('span');
     ele.textContent = `{{ ${this.tableName}.${this.fieldName} }}`;
-    ele.className = 'custom-dynamic-value';
+    ele.className = 'custom-dynamic-value mceNonEditable';
     return ele;
   }
 
