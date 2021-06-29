@@ -1,8 +1,15 @@
-import type { HttpParams, PaginationParams, PaginationResponseData } from '@/http/request';
+import type {
+  HttpParams,
+  PaginationParams,
+  PaginationResponseData,
+  ResponseData,
+} from '@/http/request';
 import { useCallback } from 'react';
 
 export function useTableRequest<P, T = any>(
-  service: (params: HttpParams & PaginationParams) => Promise<PaginationResponseData<P>>,
+  service: (
+    params: HttpParams & PaginationParams,
+  ) => Promise<ResponseData<PaginationResponseData<P>>>,
 ) {
   const request = useCallback(
     async (

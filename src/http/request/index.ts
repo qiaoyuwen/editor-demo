@@ -14,12 +14,12 @@ export interface ResponseData<T> {
   data: T;
 }
 
-export type PaginationResponseData<T> = ResponseData<{
+export interface PaginationResponseData<T> {
   list: T[];
   current: number;
   pageSize: number;
   total: number;
-}>;
+}
 
 async function getJson<T>(url: string, params?: HttpParams): Promise<ResponseData<T>> {
   return request(url, {

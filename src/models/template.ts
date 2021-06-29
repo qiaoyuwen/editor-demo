@@ -4,5 +4,6 @@ export interface Template {
   id: number;
   name: string;
   createTime: string;
+  content: string;
   admin: User;
 }

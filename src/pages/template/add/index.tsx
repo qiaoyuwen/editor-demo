@@ -11,9 +11,22 @@ import { Button, Card, message } from 'antd';
 import { history } from 'umi';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { useForm } from 'antd/es/form/Form';
+import { TemplateServices } from '@/services/template';
+import { useState } from 'react';
 
-const WelcomePage: FunctionComponent = () => {
+interface Props {
+  location: {
+    query: {
+      id?: string;
+    };
+  };
+}
+
+const Component: FunctionComponent<Props> = (props) => {
+  const { id } = props.location.query;
   const editorRef = useRef<TinyMCEEditor | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [form] =
     useForm<{
       name: string;
@@ -28,14 +41,20 @@ const WelcomePage: FunctionComponent = () => {
         </Button>,
       ]}
     >
-      <Card>
+      <Card loading={loading}>
         <ProForm<{
           name: string;
         }>
           form={form}
           onFinish={async (values) => {
             try {
-              console.log(values);
+              const content = editorRef.current?.getContent() || '';
+              if (!id) {
+                await TemplateServices.createTemplate({
+                  name: values.name,
+                  content,
+                });
+              }
               message.success('操作成功');
             } catch {
               message.error('操作失败');
@@ -48,11 +67,13 @@ const WelcomePage: FunctionComponent = () => {
           <ProFormText name="name" label="模板名称" rules={[{ required: true, message: '必填' }]} />
         </ProForm>
       </Card>
+
       <div className={styles.editorContainer}>
         <Editor
           apiKey={AppConfig.TinyMCEKey}
           onInit={(_evt, editor) => {
             editorRef.current = editor;
+            setLoading(false);
           }}
           init={{
             language: 'zh_CN',
@@ -148,4 +169,4 @@ const WelcomePage: FunctionComponent = () => {
   );
 };
 
-export default WelcomePage;
+export default Component;

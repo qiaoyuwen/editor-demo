@@ -27,7 +27,7 @@ const WelcomePage: FunctionComponent = () => {
     },
     {
       title: '创建时间',
-      dataIndex: 'ctime',
+      dataIndex: 'createTime',
       align: 'center',
       valueType: 'dateTime',
       search: false,
