@@ -1,3 +1,6 @@
+export const DynamicValueClassName = 'custom-dynamic-value';
+export const DynamicValueAttributeTableName = 'data-custom-table-name';
+export const DynamicValueAttributeFieldName = 'data-custom-field-name';
 export class DynamicValue {
   tableName: string;
   fieldName: string;
@@ -9,7 +12,9 @@ export class DynamicValue {
   createDom() {
     const ele = document.createElement('span');
     ele.textContent = `{{ ${this.tableName}.${this.fieldName} }}`;
-    ele.className = 'custom-dynamic-value mceNonEditable';
+    ele.className = `${DynamicValueClassName} mceNonEditable`;
+    ele.setAttribute(DynamicValueAttributeTableName, this.tableName);
+    ele.setAttribute(DynamicValueAttributeFieldName, this.fieldName);
     return ele;
   }
 

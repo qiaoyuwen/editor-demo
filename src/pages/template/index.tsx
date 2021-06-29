@@ -11,7 +11,7 @@ import { useTableRequest } from '@/hooks/table-requst';
 
 const WelcomePage: FunctionComponent = () => {
   const [request] = useTableRequest<Template>(TemplateServices.templatePageList);
-  const [{ tableActionRef }, { gotoAdd, deleteTemplate }] = useTemplatePageList();
+  const [{ tableActionRef }, { gotoAdd, deleteTemplate, exportToDoc }] = useTemplatePageList();
 
   const columns: ProColumnType<Template>[] = [
     {
@@ -40,6 +40,9 @@ const WelcomePage: FunctionComponent = () => {
         <Actions>
           <Button key="edit" type="link" onClick={() => gotoAdd(item.id)}>
             编辑
+          </Button>
+          <Button key="edit" type="link" onClick={() => exportToDoc(item)}>
+            导出
           </Button>
           <Button key="delete" type="link" danger onClick={() => deleteTemplate(item)}>
             删除
