@@ -49,4 +49,9 @@ export default {
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
+
+  'menu.template': '模板管理',
+  'menu.template.template-list': '模板列表',
+  'menu.template.template-add': '新增模板',
+  'menu.template.template-edit': '编辑模板',
 };

@@ -3,12 +3,23 @@ import { errorHandler, requestInterceptor } from './interceptors';
 import { request } from 'umi';
 
 export type HttpParams = Record<string, any> | URLSearchParams;
+export interface PaginationParams {
+  current: number;
+  pageSize: number;
+}
 
 export interface ResponseData<T> {
   statusCode: number;
   message: string;
   data: T;
 }
+
+export type PaginationResponseData<T> = ResponseData<{
+  list: T[];
+  current: number;
+  pageSize: number;
+  total: number;
+}>;
 
 async function getJson<T>(url: string, params?: HttpParams): Promise<ResponseData<T>> {
   return request(url, {

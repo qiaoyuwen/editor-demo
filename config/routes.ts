@@ -9,14 +9,36 @@ const routes: Route[] = [
     hideInMenu: true,
   },
   {
-    path: '/welcome',
-    name: 'welcome',
+    path: '/template',
+    name: 'template',
     icon: 'profile',
-    component: './welcome',
+    routes: [
+      {
+        path: '/template/list',
+        name: 'template-list',
+        component: './template',
+      },
+      {
+        path: '/template/add',
+        name: 'template-add',
+        component: './template/add',
+        hideInMenu: true,
+      },
+      {
+        path: '/template/edit',
+        name: 'template-edit',
+        component: './template/add',
+        hideInMenu: true,
+      },
+      {
+        path: '/template',
+        redirect: '/template/list',
+      },
+    ],
   },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/template',
   },
   {
     component: './404',
