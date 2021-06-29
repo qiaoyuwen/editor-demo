@@ -47,6 +47,13 @@ async function postJson<T>(url: string, data?: Record<string, any>): Promise<Res
   });
 }
 
+async function putJson<T>(url: string, data?: Record<string, any>): Promise<ResponseData<T>> {
+  return request(url, {
+    method: 'PUT',
+    data,
+  });
+}
+
 async function postFile<T>(url: string, file: File): Promise<ResponseData<T>> {
   const formData = new FormData();
   formData.append('file', file);
@@ -74,6 +81,7 @@ const objectToFormData = (obj: Record<string, any>) => {
 export const HttpUtils = {
   getJson,
   postJson,
+  putJson,
   postFile,
   getImageToBase64,
   deleteRequest,

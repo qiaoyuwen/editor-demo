@@ -1,4 +1,5 @@
 import type { Template } from '@/models/template';
+import { TemplateServices } from '@/services/template';
 import type { ActionType } from '@ant-design/pro-table';
 import { message, Modal } from 'antd';
 import { useRef, useCallback } from 'react';
@@ -12,7 +13,7 @@ export const useTemplatePageList = () => {
       title: '确认删除？',
       onOk: async () => {
         try {
-          console.log('deleteTemplate', item);
+          await TemplateServices.deleteTemplate(`${item.id}`);
           message.success('操作成功');
         } catch {
           message.error('操作失败');
@@ -23,7 +24,11 @@ export const useTemplatePageList = () => {
   }, []);
 
   const gotoAdd = (id?: number) => {
-    history.push(`/template/add${id ? `?id=${id}` : ''}`);
+    if (id) {
+      history.push(`/template/edit?id=${id}`);
+    } else {
+      history.push(`/template/add`);
+    }
   };
 
   return [

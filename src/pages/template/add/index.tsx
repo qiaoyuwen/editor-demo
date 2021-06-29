@@ -13,6 +13,9 @@ import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { useForm } from 'antd/es/form/Form';
 import { TemplateServices } from '@/services/template';
 import { useState } from 'react';
+import { useTemplate } from '@/data/template';
+import { useCallback } from 'react';
+import { useEffect } from 'react';
 
 interface Props {
   location: {
@@ -26,11 +29,25 @@ const Component: FunctionComponent<Props> = (props) => {
   const { id } = props.location.query;
   const editorRef = useRef<TinyMCEEditor | null>(null);
   const [loading, setLoading] = useState(true);
+  const [template, templateLoading] = useTemplate(id);
 
   const [form] =
     useForm<{
       name: string;
     }>();
+
+  const init = useCallback(() => {
+    if (template && editorRef.current && form) {
+      form.setFieldsValue({
+        name: template.name,
+      });
+      editorRef.current.setContent(template.content);
+    }
+  }, [form, template]);
+
+  useEffect(() => {
+    init();
+  }, [init]);
 
   return (
     <PageContainer
@@ -41,7 +58,7 @@ const Component: FunctionComponent<Props> = (props) => {
         </Button>,
       ]}
     >
-      <Card loading={loading}>
+      <Card loading={loading || templateLoading}>
         <ProForm<{
           name: string;
         }>
@@ -51,6 +68,11 @@ const Component: FunctionComponent<Props> = (props) => {
               const content = editorRef.current?.getContent() || '';
               if (!id) {
                 await TemplateServices.createTemplate({
+                  name: values.name,
+                  content,
+                });
+              } else {
+                await TemplateServices.updateTemplate(id, {
                   name: values.name,
                   content,
                 });
@@ -73,7 +95,11 @@ const Component: FunctionComponent<Props> = (props) => {
           apiKey={AppConfig.TinyMCEKey}
           onInit={(_evt, editor) => {
             editorRef.current = editor;
-            setLoading(false);
+
+            setTimeout(() => {
+              setLoading(false);
+              init();
+            }, 100);
           }}
           init={{
             language: 'zh_CN',
