@@ -1,6 +1,10 @@
 import type { Template } from '@/models/template';
 import { TemplateServices } from '@/services/template';
-import { DynamicValueClassName } from '@/utils/tinymce/models/dynamic-value';
+import {
+  DynamicValueAttributeFieldName,
+  DynamicValueAttributeTableName,
+  DynamicValueClassName,
+} from '@/utils/tinymce/models/dynamic-value';
 import type { ActionType } from '@ant-design/pro-table';
 import { message, Modal } from 'antd';
 import { useRef, useCallback } from 'react';
@@ -68,10 +72,19 @@ export const useTemplatePageList = () => {
           const dynamicValueItems = Array.from(
             container.querySelectorAll(`.${DynamicValueClassName}`),
           );
-          dynamicValueItems.forEach((dynamicValueItem) => {
-            // eslint-disable-next-line no-param-reassign
-            dynamicValueItem.outerHTML = '{{ replace-value }}';
-          });
+          // eslint-disable-next-line no-restricted-syntax
+          for (const dynamicValueItem of dynamicValueItems) {
+            const tableName = dynamicValueItem.getAttribute(DynamicValueAttributeTableName);
+            const fieldName = dynamicValueItem.getAttribute(DynamicValueAttributeFieldName);
+            if (tableName && fieldName) {
+              // eslint-disable-next-line no-await-in-loop
+              const res = await TemplateServices.getValue({
+                tableName,
+                fieldName,
+              });
+              dynamicValueItem.outerHTML = `${res.data}`;
+            }
+          }
           export2Word('test.doc', container.innerHTML);
           message.success('操作成功');
         } catch {

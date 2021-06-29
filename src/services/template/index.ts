@@ -22,10 +22,15 @@ const deleteTemplate = async (id: string) => {
   return HttpUtils.deleteRequest(`/templates/${id}`);
 };
 
+const getValue = async (params: { tableName: string; fieldName: string }) => {
+  return HttpUtils.getJson<any>('/templates/getValue', params);
+};
+
 export const TemplateServices = {
   templatePageList,
   createTemplate,
   getTemplate,
   deleteTemplate,
   updateTemplate,
+  getValue,
 };
