@@ -11,7 +11,7 @@ export class DynamicValue {
 
   createDom() {
     const ele = document.createElement('span');
-    ele.textContent = `{{ ${this.tableName}.${this.fieldName} }}`;
+    ele.textContent = `{{ 动态值: ${this.tableName}.${this.fieldName} }}`;
     ele.className = `${DynamicValueClassName} mceNonEditable`;
     ele.setAttribute(DynamicValueAttributeTableName, this.tableName);
     ele.setAttribute(DynamicValueAttributeFieldName, this.fieldName);

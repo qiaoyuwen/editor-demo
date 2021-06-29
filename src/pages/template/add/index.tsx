@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useTemplate } from '@/data/template';
 import { useCallback } from 'react';
 import { useEffect } from 'react';
+import { DynamicTableValue } from '@/utils/tinymce/models/dynamic-table-value';
 
 interface Props {
   location: {
@@ -180,7 +181,43 @@ const Component: FunctionComponent<Props> = (props) => {
                       type: 'menuitem',
                       text: '动态表格',
                       onAction: () => {
-                        editor.plugins.table.insertTable(2, 3);
+                        const dialogConfig: TinyMCEUi.Dialog.DialogSpec<{
+                          tableName: string;
+                        }> = {
+                          title: '添加动态值',
+                          body: {
+                            type: 'panel',
+                            items: [
+                              {
+                                type: 'input',
+                                name: 'tableName',
+                                label: '表名',
+                              },
+                            ],
+                          },
+                          buttons: [
+                            {
+                              type: 'cancel',
+                              name: 'closeButton',
+                              text: '取消',
+                            },
+                            {
+                              type: 'submit',
+                              name: 'submitButton',
+                              text: '保存',
+                              primary: true,
+                            },
+                          ],
+                          onSubmit: (api) => {
+                            const data = api.getData();
+
+                            const item = new DynamicTableValue(data.tableName);
+                            editor.insertContent(item.createHtml());
+
+                            api.close();
+                          },
+                        };
+                        editor.windowManager.open(dialogConfig);
                       },
                     },
                   ];

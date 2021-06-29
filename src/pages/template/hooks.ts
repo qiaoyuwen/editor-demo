@@ -1,5 +1,6 @@
 import type { Template } from '@/models/template';
 import { TemplateServices } from '@/services/template';
+import { DynamicTableValueClassName } from '@/utils/tinymce/models/dynamic-table-value';
 import {
   DynamicValueAttributeFieldName,
   DynamicValueAttributeTableName,
@@ -83,6 +84,37 @@ export const useTemplatePageList = () => {
                 fieldName,
               });
               dynamicValueItem.outerHTML = `${res.data}`;
+            }
+          }
+
+          const dynamicTableValueItems = Array.from(
+            container.querySelectorAll(`.${DynamicTableValueClassName}`),
+          );
+          // eslint-disable-next-line no-restricted-syntax
+          for (const dynamicTableValueItem of dynamicTableValueItems) {
+            const tableName = dynamicTableValueItem.getAttribute(DynamicValueAttributeTableName);
+            if (tableName) {
+              // eslint-disable-next-line no-await-in-loop
+              const { data } = await TemplateServices.getTableValue({
+                tableName,
+              });
+              const tableHtml = `<table style="border-collapse: collapse; width: 100%" border="1">
+                <tbody>
+                  <tr>
+                    ${data.fields.map((field) => `<td>${field.COLUMN_NAME}</td>`).join('')}
+                  </tr>
+                  ${data.values
+                    .map((valueItem) => {
+                      return `<tr>${Object.keys(valueItem)
+                        .map((key) => {
+                          return `<td>${valueItem[key]}</td>`;
+                        })
+                        .join('')}</tr>`;
+                    })
+                    .join('')}
+                </tbody>
+              </table>`;
+              dynamicTableValueItem.outerHTML = tableHtml;
             }
           }
           export2Word('test.doc', container.innerHTML);

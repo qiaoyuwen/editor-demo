@@ -26,6 +26,13 @@ const getValue = async (params: { tableName: string; fieldName: string }) => {
   return HttpUtils.getJson<any>('/templates/getValue', params);
 };
 
+const getTableValue = async (params: { tableName: string }) => {
+  return HttpUtils.getJson<{
+    fields: any[];
+    values: any[];
+  }>('/templates/getTableValue', params);
+};
+
 export const TemplateServices = {
   templatePageList,
   createTemplate,
@@ -33,4 +40,5 @@ export const TemplateServices = {
   deleteTemplate,
   updateTemplate,
   getValue,
+  getTableValue,
 };
