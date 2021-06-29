@@ -34,7 +34,7 @@
     "test:all": "node ./tests/run-tests.js",
     "test:component": "umi test ./src/components",
     "tsc": "tsc --noEmit",
-    "husky-init": "husky install .husky"
+    "husky-init": "husky install"
   },
   "lint-staged": {
     "**/*.{js,jsx,tsx,ts,less,md,json}": [
