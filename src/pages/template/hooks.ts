@@ -6,6 +6,31 @@ import { message, Modal } from 'antd';
 import { useRef, useCallback } from 'react';
 import { history } from 'umi';
 
+const export2Word = (filename: string, content: string) => {
+  const preHtml =
+    "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+  const postHtml = '</body></html>';
+  const html = preHtml + content + postHtml;
+
+  const blob = new Blob(['\ufeff', html], {
+    type: 'application/msword',
+  });
+
+  // Specify link url
+  const url = URL.createObjectURL(blob);
+
+  // Create download link element
+  const downloadLink = document.createElement('a');
+  // Create a link to the file
+  downloadLink.href = url;
+
+  // Setting the file name
+  downloadLink.download = filename;
+
+  // triggering the function
+  downloadLink.click();
+};
+
 export const useTemplatePageList = () => {
   const tableActionRef = useRef<ActionType>();
 
@@ -47,23 +72,7 @@ export const useTemplatePageList = () => {
             // eslint-disable-next-line no-param-reassign
             dynamicValueItem.outerHTML = '{{ replace-value }}';
           });
-
-          const html = `<!DOCTYPE html>
-          <html lang="en">
-            <head>
-              <meta charset="UTF-8" />
-              <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-              <meta
-                name="viewport"
-                content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-              />
-            </head>
-            <body>
-              ${container.innerHTML}
-            </body>
-          </html>
-          `;
-          console.log('result', html);
+          export2Word('test.doc', container.innerHTML);
           message.success('操作成功');
         } catch {
           message.error('操作失败');
