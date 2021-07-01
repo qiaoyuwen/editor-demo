@@ -33,10 +33,34 @@ const Component: FunctionComponent<Props> = (props) => {
   const [loading, setLoading] = useState(true);
   const [template, templateLoading] = useTemplate(id);
 
-  const [form] =
-    useForm<{
-      name: string;
-    }>();
+  const [form] = useForm<{
+    name: string;
+  }>();
+
+  const setToc = useCallback(() => {
+    if (!editorRef.current) {
+      return;
+    }
+    let content = editorRef.current.getContent();
+    if (!content) {
+      return;
+    }
+    const ele = document.createElement('div');
+    ele.innerHTML = content;
+    let tocEle = ele.querySelector('.mce-toc');
+    if (tocEle) {
+      editorRef.current.execCommand('mceUpdateToc');
+    } else {
+      editorRef.current.execCommand('mceInsertToc');
+    }
+
+    content = editorRef.current.getContent();
+    ele.innerHTML = content;
+    tocEle = ele.querySelector('.mce-toc');
+    if (tocEle && tocDivRef.current) {
+      tocDivRef.current.innerHTML = tocEle.outerHTML;
+    }
+  }, []);
 
   const init = useCallback(() => {
     if (template && editorRef.current && form) {
@@ -44,8 +68,9 @@ const Component: FunctionComponent<Props> = (props) => {
         name: template.name,
       });
       editorRef.current.setContent(template.content);
+      setToc();
     }
-  }, [form, template]);
+  }, [form, template, setToc]);
 
   useEffect(() => {
     init();
@@ -121,6 +146,9 @@ const Component: FunctionComponent<Props> = (props) => {
           <Editor
             apiKey={AppConfig.TinyMCEKey}
             onInit={(_evt, editor) => {
+              editor.on('input', () => {
+                setToc();
+              });
               editorRef.current = editor;
 
               setTimeout(() => {
@@ -137,8 +165,9 @@ const Component: FunctionComponent<Props> = (props) => {
                 'insertdatetime table paste imagetools wordcount noneditable toc',
               ],
               toolbar:
-                'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | dynamicmenu | direcotorybutton',
-              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | dynamicmenu',
+              content_style:
+                'body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .mce-toc { display: none; }',
               // 图片
               images_upload_url: '',
               images_upload_handler: async (blobInfo, success) => {
@@ -253,16 +282,7 @@ const Component: FunctionComponent<Props> = (props) => {
 
                 editor.ui.registry.addButton('direcotorybutton', {
                   text: '目录',
-                  onAction: () => {
-                    editor.execCommand('mceInsertToc');
-                    const content = editor.getContent();
-                    const ele = document.createElement('div');
-                    ele.innerHTML = content;
-                    const tocEle = ele.querySelector('.mce-toc');
-                    if (tocEle && tocDivRef.current) {
-                      tocDivRef.current.innerHTML = tocEle.outerHTML;
-                    }
-                  },
+                  onAction: () => setToc(),
                 });
               },
             }}

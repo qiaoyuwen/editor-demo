@@ -15,7 +15,15 @@ const export2Word = (filename: string, content: string) => {
   const preHtml =
     "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
   const postHtml = '</body></html>';
-  const html = preHtml + content + postHtml;
+
+  const ele = document.createElement('div');
+  ele.innerHTML = content;
+  const tocEle = ele.querySelector('.mce-toc');
+  if (tocEle) {
+    tocEle.outerHTML = '';
+  }
+
+  const html = preHtml + ele.innerHTML + postHtml;
 
   const blob = new Blob(['\ufeff', html], {
     type: 'application/msword',
