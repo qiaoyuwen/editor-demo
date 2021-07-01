@@ -29,6 +29,7 @@ interface Props {
 const Component: FunctionComponent<Props> = (props) => {
   const { id } = props.location.query;
   const editorRef = useRef<TinyMCEEditor | null>(null);
+  const tocDivRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [template, templateLoading] = useTemplate(id);
 
@@ -92,141 +93,181 @@ const Component: FunctionComponent<Props> = (props) => {
       </Card>
 
       <div className={styles.editorContainer}>
-        <Editor
-          apiKey={AppConfig.TinyMCEKey}
-          onInit={(_evt, editor) => {
-            editorRef.current = editor;
+        <Card>
+          <div
+            className={styles.editorToc}
+            ref={tocDivRef}
+            onClick={(e) => {
+              // 目录锚点跳转
+              const iframeEle = document.querySelector('iframe');
+              if (!iframeEle || !iframeEle.contentWindow || !iframeEle.contentWindow.location) {
+                return;
+              }
+              iframeEle.contentWindow.location.hash = '';
 
-            setTimeout(() => {
-              setLoading(false);
-              init();
-            }, 100);
-          }}
-          init={{
-            language: 'zh_CN',
-            height: '100%',
-            plugins: [
-              'advlist autolink lists link image charmap print preview anchor',
-              'searchreplace visualblocks code fullscreen',
-              'insertdatetime table paste imagetools wordcount noneditable',
-            ],
-            toolbar:
-              'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | dynamicmenu',
-            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-            // 图片
-            images_upload_url: '',
-            images_upload_handler: async (blobInfo, success) => {
-              const res = await FilesServices.uploadFile(
-                new File([blobInfo.blob()], blobInfo.filename()),
-              );
-              success(`${AppConfig.ImgDomain}/${res.data.url}`);
-            },
-            paste_data_images: true,
-            // 自定义动态值
-            setup: (editor) => {
-              editor.ui.registry.addMenuButton('dynamicmenu', {
-                text: '动态插入',
-                fetch: (callback) => {
-                  const items: TinyMCEUi.Menu.NestedMenuItemContents[] = [
-                    {
-                      type: 'menuitem',
-                      text: '动态值',
-                      onAction: () => {
-                        const dialogConfig: TinyMCEUi.Dialog.DialogSpec<{
-                          tableName: string;
-                          tableField: string;
-                        }> = {
-                          title: '添加动态值',
-                          body: {
-                            type: 'panel',
-                            items: [
+              const target = e.target as HTMLElement | null;
+              if (target?.tagName !== 'A') {
+                return;
+              }
+              const href = target.getAttribute('href')?.replace('#', '');
+              if (!href) {
+                return;
+              }
+              iframeEle.contentWindow.location.hash = href;
+            }}
+          ></div>
+        </Card>
+        <div className={styles.editor}>
+          <Editor
+            apiKey={AppConfig.TinyMCEKey}
+            onInit={(_evt, editor) => {
+              editorRef.current = editor;
+
+              setTimeout(() => {
+                setLoading(false);
+                init();
+              }, 100);
+            }}
+            init={{
+              language: 'zh_CN',
+              height: '100%',
+              plugins: [
+                'advlist autolink lists link image charmap print preview anchor',
+                'searchreplace visualblocks code fullscreen',
+                'insertdatetime table paste imagetools wordcount noneditable toc',
+              ],
+              toolbar:
+                'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | dynamicmenu | direcotorybutton',
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+              // 图片
+              images_upload_url: '',
+              images_upload_handler: async (blobInfo, success) => {
+                const res = await FilesServices.uploadFile(
+                  new File([blobInfo.blob()], blobInfo.filename()),
+                );
+                success(`${AppConfig.ImgDomain}/${res.data.url}`);
+              },
+              paste_data_images: true,
+              // 自定义动态值
+              setup: (editor) => {
+                editor.ui.registry.addMenuButton('dynamicmenu', {
+                  text: '动态插入',
+                  fetch: (callback) => {
+                    const items: TinyMCEUi.Menu.NestedMenuItemContents[] = [
+                      {
+                        type: 'menuitem',
+                        text: '动态值',
+                        onAction: () => {
+                          const dialogConfig: TinyMCEUi.Dialog.DialogSpec<{
+                            tableName: string;
+                            tableField: string;
+                          }> = {
+                            title: '添加动态值',
+                            body: {
+                              type: 'panel',
+                              items: [
+                                {
+                                  type: 'input',
+                                  name: 'tableName',
+                                  label: '表名',
+                                },
+                                {
+                                  type: 'input',
+                                  name: 'tableField',
+                                  label: '字段名',
+                                },
+                              ],
+                            },
+                            buttons: [
                               {
-                                type: 'input',
-                                name: 'tableName',
-                                label: '表名',
+                                type: 'cancel',
+                                name: 'closeButton',
+                                text: '取消',
                               },
                               {
-                                type: 'input',
-                                name: 'tableField',
-                                label: '字段名',
-                              },
-                            ],
-                          },
-                          buttons: [
-                            {
-                              type: 'cancel',
-                              name: 'closeButton',
-                              text: '取消',
-                            },
-                            {
-                              type: 'submit',
-                              name: 'submitButton',
-                              text: '保存',
-                              primary: true,
-                            },
-                          ],
-                          onSubmit: (api) => {
-                            const data = api.getData();
-
-                            const item = new DynamicValue(data.tableName, data.tableField);
-                            editor.insertContent(item.createHtml());
-
-                            api.close();
-                          },
-                        };
-                        editor.windowManager.open(dialogConfig);
-                      },
-                    },
-                    {
-                      type: 'menuitem',
-                      text: '动态表格',
-                      onAction: () => {
-                        const dialogConfig: TinyMCEUi.Dialog.DialogSpec<{
-                          tableName: string;
-                        }> = {
-                          title: '添加动态值',
-                          body: {
-                            type: 'panel',
-                            items: [
-                              {
-                                type: 'input',
-                                name: 'tableName',
-                                label: '表名',
+                                type: 'submit',
+                                name: 'submitButton',
+                                text: '保存',
+                                primary: true,
                               },
                             ],
-                          },
-                          buttons: [
-                            {
-                              type: 'cancel',
-                              name: 'closeButton',
-                              text: '取消',
-                            },
-                            {
-                              type: 'submit',
-                              name: 'submitButton',
-                              text: '保存',
-                              primary: true,
-                            },
-                          ],
-                          onSubmit: (api) => {
-                            const data = api.getData();
+                            onSubmit: (api) => {
+                              const data = api.getData();
 
-                            const item = new DynamicTableValue(data.tableName);
-                            editor.insertContent(item.createHtml());
+                              const item = new DynamicValue(data.tableName, data.tableField);
+                              editor.insertContent(item.createHtml());
 
-                            api.close();
-                          },
-                        };
-                        editor.windowManager.open(dialogConfig);
+                              api.close();
+                            },
+                          };
+                          editor.windowManager.open(dialogConfig);
+                        },
                       },
-                    },
-                  ];
-                  callback(items);
-                },
-              });
-            },
-          }}
-        />
+                      {
+                        type: 'menuitem',
+                        text: '动态表格',
+                        onAction: () => {
+                          const dialogConfig: TinyMCEUi.Dialog.DialogSpec<{
+                            tableName: string;
+                          }> = {
+                            title: '添加动态值',
+                            body: {
+                              type: 'panel',
+                              items: [
+                                {
+                                  type: 'input',
+                                  name: 'tableName',
+                                  label: '表名',
+                                },
+                              ],
+                            },
+                            buttons: [
+                              {
+                                type: 'cancel',
+                                name: 'closeButton',
+                                text: '取消',
+                              },
+                              {
+                                type: 'submit',
+                                name: 'submitButton',
+                                text: '保存',
+                                primary: true,
+                              },
+                            ],
+                            onSubmit: (api) => {
+                              const data = api.getData();
+
+                              const item = new DynamicTableValue(data.tableName);
+                              editor.insertContent(item.createHtml());
+
+                              api.close();
+                            },
+                          };
+                          editor.windowManager.open(dialogConfig);
+                        },
+                      },
+                    ];
+                    callback(items);
+                  },
+                });
+
+                editor.ui.registry.addButton('direcotorybutton', {
+                  text: '目录',
+                  onAction: () => {
+                    editor.execCommand('mceInsertToc');
+                    const content = editor.getContent();
+                    const ele = document.createElement('div');
+                    ele.innerHTML = content;
+                    const tocEle = ele.querySelector('.mce-toc');
+                    if (tocEle && tocDivRef.current) {
+                      tocDivRef.current.innerHTML = tocEle.outerHTML;
+                    }
+                  },
+                });
+              },
+            }}
+          />
+        </div>
       </div>
     </PageContainer>
   );
