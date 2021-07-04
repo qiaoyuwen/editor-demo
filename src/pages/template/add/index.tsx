@@ -118,7 +118,7 @@ const Component: FunctionComponent<Props> = (props) => {
       </Card>
 
       <div className={styles.editorContainer}>
-        <Card>
+        <Card className={styles.editorTocCard}>
           <div
             className={styles.editorToc}
             ref={tocDivRef}
