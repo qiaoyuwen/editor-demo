@@ -9,7 +9,10 @@ export const errorHandler = (error: ResponseError) => {
   const { response } = error;
   if (response && response.status) {
     if (response.status === 401 || response.status === 403) {
-      // 略过
+      notification.info({
+        message: '提示',
+        description: '您的登录信息已过期，请重新登录',
+      });
     } else {
       const errorText = CodeMessage[response.status] || response.statusText;
       const { status, url } = response;
