@@ -8,13 +8,17 @@ import { CodeMessage } from './constant';
 export const errorHandler = (error: ResponseError) => {
   const { response } = error;
   if (response && response.status) {
-    const errorText = CodeMessage[response.status] || response.statusText;
-    const { status, url } = response;
+    if (response.status === 401 || response.status === 403) {
+      // 略过
+    } else {
+      const errorText = CodeMessage[response.status] || response.statusText;
+      const { status, url } = response;
 
-    notification.error({
-      message: `请求错误 ${status}: ${url}`,
-      description: errorText,
-    });
+      notification.error({
+        message: `请求错误 ${status}: ${url}`,
+        description: errorText,
+      });
+    }
   }
 
   if (!response) {
